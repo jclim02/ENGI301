@@ -124,7 +124,8 @@ class Button():
         # HW#4 TODO: (one line of code)
         #   Remove "pass" and return the comparison of input value of the GPIO pin of 
         #   the buton (i.e. self.pin) to the "pressed value" of the class 
-        pass
+        if self == 1:
+            
 
     # End def
 
