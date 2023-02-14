@@ -110,7 +110,7 @@ class Button():
         # Initialize Button
         # HW#4 TODO: (one line of code)
         #   Remove "pass" and use the Adafruit_BBIO.GPIO library to set up the button
-        GPIO.setup("P2_10", GPIO.OUT)
+        GPIO.setup("P2_2", GPIO.IN)
 
     # End def
 
@@ -124,8 +124,7 @@ class Button():
         # HW#4 TODO: (one line of code)
         #   Remove "pass" and return the comparison of input value of the GPIO pin of 
         #   the buton (i.e. self.pin) to the "pressed value" of the class 
-        if self == 1:
-            
+        return self.pin == self.pressed_value
 
     # End def
 
@@ -162,11 +161,11 @@ class Button():
         #   GPIO pin of the buton (i.e. self.pin) to the "unpressed value" 
         #   of the class (i.e. we are executing the while loop while the 
         #   button is not being pressed)
-        while(False):
+        while self.pin == 1:
         
             if function is not None:
                 function_return_value = function()
-                
+            
             time.sleep(self.sleep_time)
         
         # Record time
@@ -180,7 +179,7 @@ class Button():
         #   GPIO pin of the buton (i.e. self.pin) to the "pressed value" 
         #   of the class (i.e. we are executing the while loop while the 
         #   button is being pressed)
-        while(False):
+        while self.pin == self.pressed_value:
             time.sleep(self.sleep_time)
         
         # Compute the button_press_time
@@ -241,6 +240,7 @@ if __name__ == '__main__':
         
     except KeyboardInterrupt:
         pass
-
+   
     print("Test Complete")
+    
 
