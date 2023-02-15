@@ -110,7 +110,7 @@ class Button():
         # Initialize Button
         # HW#4 TODO: (one line of code)
         #   Remove "pass" and use the Adafruit_BBIO.GPIO library to set up the button
-        GPIO.setup("P2_2", GPIO.IN)
+        GPIO.setup(self.pin, GPIO.IN)
 
     # End def
 
@@ -123,9 +123,8 @@ class Button():
         """
         # HW#4 TODO: (one line of code)
         #   Remove "pass" and return the comparison of input value of the GPIO pin of 
-        #   the buton (i.e. self.pin) to the "pressed value" of the class 
-        return self.pin == self.pressed_value
-
+        #   the button (i.e. self.pin) to the "pressed value" of the class 
+        return not GPIO.input(self.pin)
     # End def
 
 
