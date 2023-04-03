@@ -34,10 +34,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Light Sensor Driver
 
   This driver is built for light sensors that are connected 
-directly to the XXXX (i.e. XXXX)
+directly to an i2c bus.
 
 Software API:
-
+    - Light(pin)
+        - get_value(): 
+            - returns light reading (lux) as an integer
   
 """
 
@@ -46,20 +48,11 @@ import board
 import adafruit_bh1750
 
 # ------------------------------------------------------------------------
-# Constants
-# ------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------
 # Functions / Classes
 # ------------------------------------------------------------------------
 
 class Light():
     """ Light Sensor Class """
-    # Class variables
     bus     = None
     address = None
     command = None
@@ -69,21 +62,20 @@ class Light():
         self.bus     = bus
         self.address = address
         self.command = "/usr/sbin/i2cset -y {0} {1}".format(bus, address)
-      
-        #self._setup()
-      
-    #def _setup(self):
-     #   """ Initialize the sensor itself"""
-        
+    
+    # End def
         
         
     def get_value(self):
-        """ Get light value """
+        """ Get light value in lux """
         i2c = board.I2C()
         sensor = adafruit_bh1750.BH1750(i2c)
         
         return int(sensor.lux)
+        
+    # End def
     
+# End class
     
 # ------------------------------------------------------------------------
 # Main script

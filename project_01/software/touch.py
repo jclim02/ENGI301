@@ -34,12 +34,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Capacitive Touch Sensor Driver
 
   This driver is built for capacitive touch sensors that are connected 
-directly to the XXXX (i.e. XXXX)
+directly to an i2c bus.
 
 Software API:
-
+    - Touch(pin)
+        - get_value(): 
+            - returns capacitive touch reading as an integer
   
-
 """
 
 import board
@@ -49,20 +50,11 @@ from adafruit_cap1188.i2c import CAP1188_I2C
 import time
 
 # ------------------------------------------------------------------------
-# Constants
-# ------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------
 # Functions / Classes
 # ------------------------------------------------------------------------
 
 class Touch():
     """ Touch Sensor Class """
-    # Class variables
     bus     = None
     address = None
     command = None
@@ -73,15 +65,24 @@ class Touch():
         self.address = address
         self.command = "/usr/sbin/i2cset -y {0} {1}".format(bus, address)
         
+        # Set up sensor
         i2c = busio.I2C(board.SCL_2, board.SDA_2)
         cap = CAP1188_I2C(self.bus)
         
+    # End def
+    
+        
     def get_value(self):
-        # i2c = busio.I2C(board.SCL_2, board.SDA_2)
+        """ Return capacitive touch raw value as integer """
+        
         cap = CAP1188_I2C(self.bus)
         
         raw_sensor1 = cap[1].raw_value
         return int(raw_sensor1)
+    
+    # End def
+    
+# End class
         
 # ------------------------------------------------------------------------
 # Main script

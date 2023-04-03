@@ -40,7 +40,7 @@
 # --------------------------------------------------------------------------
 
 # Moisture Sensor (ADC)
-# config-pin PX_XX XXX
+config-pin P2_02 default
 
 # Light Sensor, I2C1
 config-pin P2_09 i2c
@@ -50,7 +50,8 @@ config-pin P2_11 i2c
 config-pin P1_26 i2c
 config-pin P1_28 i2c
 
-# Sound Output Player
-
 # Buzzer
 config-pin P2_01 pwm
+
+# Button
+config-pin P2_02 gpio

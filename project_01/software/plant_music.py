@@ -34,24 +34,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Use the following hardware components to make a plant sonification device:  
   - Capacitive Soil Moisture Sensor
 
-Requirements:
-  - Hardware:
-    - When locked:   Red LED is on; Green LED is off; Servo is "closed"; Display is unchanged
-    - When unlocked: Red LED is off; Green LED is on; Servo is "open"; Display is "----"
-    - Display shows value of potentiometer (raw value of analog input divided by 8)
-    - Button
-      - Waiting for a button press should allow the display to update (if necessary) and return any values
-      - Time the button was pressed should be recorded and returned
-    - User interaction:
-      - Needs to be able to program the combination for the “lock”
-        - Need to be able to input three values for the combination to program or unlock the “lock”
-      - Combination lock should lock when done programming and wait for combination input
-      - If combination is unsuccessful, the lock should go back to waiting for combination input
-      - If combination was successful, the lock should unlock
-        - When unlocked, pressing button for less than 2s will re-lock the lock; greater than 2s will allow lock to be re-programmed
+API:
+
 
 Uses:
-  - Libraries developed in class
+  - moisture, light, touch, buzzer, and button libraries
 
 """
 
@@ -59,7 +46,7 @@ import moisture as MOIST
 import light as LIGHT
 import touch as TOUCH
 import buzzer as BUZZER
-import buzzer_music as MUSIC
+import button as BUTTON
 
 import board
 import busio
@@ -85,13 +72,15 @@ class PlantMusic():
     light       = None
     touch       = None
     buzzer      = None
+    i2c         = busio.I2C(board.SCL_2, board.SDA_2)
     
-    def __init__(self, moist="AIN6", light_bus=1, light_address=0x23, touch_bus=None, touch_address=0x29,buzzer="P2_1"):
+    def __init__(self,moist="AIN6",light_bus=1,light_address=0x23,touch_bus=i2c,touch_address=0x29,buzzer="P2_1", button="P2_2"):
         """ Initialize variables """
         self.moist      = MOIST.Moisture(moist)
         self.light      = LIGHT.Light(light_bus,light_address)
-        self.touch      = TOUCH.Touch(busio.I2C(board.SCL_2, board.SDA_2),touch_address)
+        self.touch      = TOUCH.Touch(touch_bus,touch_address)
         self.buzzer     = BUZZER.Buzzer(buzzer)
+        self.button     = BUTTON.Button(button)
         
         self._setup
         
@@ -118,65 +107,107 @@ class PlantMusic():
         notes_nat = np.array([220,247,262,294,330,349,392,440,494,523,587,659,698,784])
         notes_sharp = np.array([220,233,247,262,277,294,311,330,349,370,392,415,440,466,494,523,554,587,622,659,698,740,784,831])
         
-        return notes_plain,notes_sharps
-            
-    def testing_moist_light_buzzer(self):
+        return notes_nat,notes_sharp
+        
+    def get_tempo(self):
         light_value     = None
+        
+        light_value = self.light.get_value()
+        
+        if light_value < 200:
+            tempo = -0.00125 * light_value + 1
+        elif light_value < 600:
+            tempo = -0.00125 * light_value + 0.75
+        elif light_value < 1500:
+            tempo = -0.000167 * light_value + 0.25
+        else:
+            tempo = 0.09
+        
+        #if light_value < 1250:
+        #        tempo = - 0.00072 * (light_value) + 1
+        #else:
+        #    tempo = 0.09
+                
+        return tempo
+        
+    def get_array(self):
         moist_value     = None
+        
+        notes_nat,notes_sharp = self.note_array()
+        
+        moist_value = self.moist.get_value()
+        if moist_value < MOIST.MIN_TARGET or moist_value > MOIST.MAX_TARGET:
+            array = notes_sharp
+        else:
+            array = notes_nat
+            
+        return array
+            
+    def play(self):
+        #light_value     = None
+        #moist_value     = None
         touch_value_1   = None
         touch_value_2   = None
         tempo           = None
         array           = None
         note            = None
         
-        notes_nat,notes_sharp = self.note_array()
+        #notes_nat,notes_sharp = self.note_array()
         
-        while True: 
-            touch_value_1 = self.touch.get_value() 
+        #while True: 
+        touch_value_1 = self.touch.get_value() 
             
-            light_value = self.light.get_value()
-            if light_value < 2500:
-                tempo = - 0.00026 *(light_value) + 0.75
-            else:
-                tempo = 0.09
+            #light_value = self.light.get_value()
+            #if light_value < 1500:
+            #    tempo = - 0.00043 *(light_value) + 0.75
+            #else:
+            #    tempo = 0.09
+            
+        tempo = self.get_tempo()
             
             #print("Value = {0}".format(light_value))
             #print("Tempo = {0}".format(tempo))
             
-            moist_value = self.moist.get_value()
+            #moist_value = self.moist.get_value()
             
-            if moist_value < MOIST.MIN_TARGET:
-                array = notes_sharp
-                length = len(array)
-                midpoint = int(length/2)
-                #print(array)
-            elif moist_value > MOIST.MAX_TARGET:
-                array = notes_sharp
-                length = len(array)
-                midpoint = int(length/2)
-                #print(array)
-            else:
-                array = notes_nat
-                length = len(array)
-                midpoint = int(length/2)
-                #print(array)
+            #if moist_value < MOIST.MIN_TARGET or moist_value > MOIST.MAX_TARGET:
+            #    array = notes_sharp
+            #else:
+            #    array = notes_nat
+            
+        array = self.get_array()
+        length = len(array)
+        quartpoint = int(length/4)
+        midpoint = int(length/2)
+        tquartpoint = int(3*length/4)
                 
-            touch_value_2 = self.touch.get_value()
-            if touch_value_1 - touch_value_2 != 0:
-                if touch_value_2 > 0:
-                    note = np.random.choice(array[midpoint:-1],size=1)
-                elif touch_value_2 < 0:
-                    note = np.random.choice(array[0:midpoint],size=1)
-                else:
-                    pass
+        touch_value_2 = self.touch.get_value()
+        if touch_value_1 - touch_value_2 != 0:
+            if touch_value_2 < -50:
+                note = np.random.choice(array[0:quartpoint],size=1)
+            elif touch_value_2 < 0:
+                note = np.random.choice(array[quartpoint:midpoint],size=1)
+            elif touch_value_2 < 50:
+                note = np.random.choice(array[midpoint:tquartpoint],size=1)
+            elif touch_value_2 < 128:
+                note = np.random.choice(array[tquartpoint:-1],size=1)
+            #if touch_value_2 > 0:
+            #    note = np.random.choice(array[midpoint:-1],size=1)
+            #elif touch_value_2 < 0:
+            #    note = np.random.choice(array[0:midpoint],size=1)
             else:
                 pass
+        else:
+            pass
             
-            self.buzzer.play(note,tempo,False)
-            time.sleep(0.01)
+        self.buzzer.play(note,tempo,False)
+        time.sleep(0.01)
             
             #self.buzzer.play(note,tempo,True)
             #time.sleep(0.01)
+            
+    def stop_button(self):
+        return self.button.is_pressed()
     
     def cleanup(self):
         self.buzzer.cleanup()
@@ -194,7 +225,17 @@ if __name__ == '__main__':
     plant_music = PlantMusic()
     
     try:
-        plant_music.testing_moist_light_buzzer()
+        while True:
+            if plant_music.stop_button() == True:
+                while True:
+                    plant_music.play()
+                    if plant_music.stop_button() == True:
+                        raise KeyboardInterrupt
+                    else:
+                        pass
+            else:
+                pass
+            
     except KeyboardInterrupt:
         plant_music.cleanup()
-    
+    print("Program Complete")

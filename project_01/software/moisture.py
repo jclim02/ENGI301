@@ -34,18 +34,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Moisture Sensor Driver
 
   This driver is built for capacitive moisture sensors that are connected 
-directly to the XXXX (i.e. XXXX)
+directly to an AIN pin
 
 Software API:
-
-  Moisture(pin)
-    - Provide PocketBeagle pin that the moisture sensor is connected
-
-  get_value()
-    - Returns the raw ADC value.  Integer in [0, 1023] 
-
-  get_voltage()
-    - Returns the approximate voltage of the pin in volts
+    - Moisture(pin)
+        - get_value()
+            - Returns the raw ADC value. Integer in [0, 1023] 
+            
+        - get_voltage()
+            - Returns the approximate voltage of the pin in volts
 
 """
 
@@ -117,25 +114,15 @@ class Moisture():
 
     
     def get_voltage(self):
-        """ Get the voltage of the pin
-        
-           Returns:  Float in volts
+        """ 
+            Get the voltage of the pin
+            Returns:  Float in volts
         """
         return ((self.get_value() / MAX_VALUE) * self.voltage)
     
     # End def    
-    
-    
-    def cleanup(self):
-        """Cleanup the hardware components."""
-        # Nothing to do for ADC
-        pass        
-        
-    # End def
 
 # End class
-    
-    
     
 # ------------------------------------------------------------------------
 # Main script

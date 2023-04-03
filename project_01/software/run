@@ -41,7 +41,8 @@ cd /var/lib/cloud9/ENGI301/project_01/software
 
 dirs=(
     '/var/lib/cloud9/ENGI301/project_01/software:'
-    '/var/lib/cloud9/ENGI301/python/buzzer'
+    '/var/lib/cloud9/ENGI301/python/buzzer:'
+    '/var/lib/cloud9/ENGI301/python/button'
 )
 
 PYTHONPATH=$(IFS=; echo "${dirs[*]}") python3 plant_music.py
