@@ -1,7 +1,7 @@
 # Plant Music
   
 ## Building Instructions
-For software, download software files from the [software folder](https://github.com/jclim02/ENGI301/tree/main/project_01/software). To find detailed hardware wiring instructions, go to [Hackster](www.hackster.io/jclim02/plant-music-ff2cc4).
+For software, download files from the [software folder](https://github.com/jclim02/ENGI301/tree/main/project_01/software). To find detailed hardware build instructions, go to [Hackster](www.hackster.io/jclim02/plant-music-ff2cc4).
 
 ## Software
 
