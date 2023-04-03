@@ -6,13 +6,21 @@ To find detailed hardware build instructions, go to [Hackster](www.hackster.io/j
 For software, download files from the [software folder](https://github.com/jclim02/ENGI301/tree/main/project_01/software). Additionally, run the following code to install necessary applications:
 
   sudo apt-get update
+  
   sudo apt-get install build-essential python-dev python-setuptools python-smbus -y
+  
   sudo apt-get install python-pip python3-pip -y
+  
   sudo apt-get install zip -y
+  
   sudo pip3 install --upgrade setuptools
+  
   sudo pip3 install --upgrade Adafruit_BBIO
+  
   sudo pip3 install adafruit-blinka
+  
   sudo pip3 install adafruit-circuitpython-bh1750
+  
   sudo pip3 install adafruit-circuitpython-cap1188
   
 
