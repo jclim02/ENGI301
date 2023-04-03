@@ -35,7 +35,22 @@ Use the following hardware components to make a plant sonification device:
   - Capacitive Soil Moisture Sensor
 
 API:
-
+    - PlantMusic():
+        - note_array():
+            - Creates two note arrays, one with only naturals and the other
+            including accidentals
+        - get_tempo(): 
+            - Calculate the tempo based on light sensor readings
+        - get_array():
+            - Determine which note array to use based on moisture sensor readings
+        - play():
+            - Use get_tempo to set tempo
+            - Use get_array to choose a note array from
+            - Use touch sensor readings to determine which range of notes to 
+            obtain a random note from
+            - Play the note using the buzzer
+        - stop_button():
+            - Return True if button is pressed, False if unpressed
 
 Uses:
   - moisture, light, touch, buzzer, and button libraries
@@ -52,15 +67,6 @@ import board
 import busio
 import time
 import numpy as np
-# import math
-
-# ------------------------------------------------------------------------
-# Constants
-# ------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------
-# Global variables
-# ------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------
 # Functions / Classes
@@ -82,34 +88,23 @@ class PlantMusic():
         self.buzzer     = BUZZER.Buzzer(buzzer)
         self.button     = BUTTON.Button(button)
         
-        self._setup
+        # No additional setup needed
         
     # End def
-    
-    
-    def _setup(self):
-        """Setup the hardware components."""
-        
-        # Moisture/
-        #   - All initialized by libraries when instanitated
-        
-        #Light:
-        #   - No setup as of 3/23
-        
-        # Touch: already in __init__
-        # i2c = busio.I2C(board.SCL_2, board.SDA_2)
-        # touch = Touch(bus=i2c, address=touch_address)
+
         
     def note_array(self):
-        # first vector? has no accidentals, second has only accidentals two scales
-        # notes_plain = np.array([31,33,37,41,44,49,55,62,65,73,82,87,98,110]) #14
-        # notes_sharps = np.array([31,33,35,37,39,41,44,46,49,52,55,58,62,65,69,73,78,82,87,93,98,104,110,117]) #24
+        """ Creates note arrays, one with only naturals and another with accidentals """
         notes_nat = np.array([220,247,262,294,330,349,392,440,494,523,587,659,698,784])
         notes_sharp = np.array([220,233,247,262,277,294,311,330,349,370,392,415,440,466,494,523,554,587,622,659,698,740,784,831])
         
         return notes_nat,notes_sharp
+    
+    # End def
+    
         
     def get_tempo(self):
+        """ Calculates tempo value from light reading """
         light_value     = None
         
         light_value = self.light.get_value()
@@ -122,15 +117,14 @@ class PlantMusic():
             tempo = -0.000167 * light_value + 0.25
         else:
             tempo = 0.09
-        
-        #if light_value < 1250:
-        #        tempo = - 0.00072 * (light_value) + 1
-        #else:
-        #    tempo = 0.09
                 
         return tempo
         
+    # End def
+    
+        
     def get_array(self):
+        """ Determines which array is used based on moisture reading """
         moist_value     = None
         
         notes_nat,notes_sharp = self.note_array()
@@ -142,45 +136,32 @@ class PlantMusic():
             array = notes_nat
             
         return array
+        
+    # End def
+    
             
     def play(self):
-        #light_value     = None
-        #moist_value     = None
+        """ Plays a note """
         touch_value_1   = None
         touch_value_2   = None
         tempo           = None
         array           = None
         note            = None
         
-        #notes_nat,notes_sharp = self.note_array()
-        
-        #while True: 
+        # Obtain intiial touch value
         touch_value_1 = self.touch.get_value() 
             
-            #light_value = self.light.get_value()
-            #if light_value < 1500:
-            #    tempo = - 0.00043 *(light_value) + 0.75
-            #else:
-            #    tempo = 0.09
-            
+        # Calculate tempo
         tempo = self.get_tempo()
-            
-            #print("Value = {0}".format(light_value))
-            #print("Tempo = {0}".format(tempo))
-            
-            #moist_value = self.moist.get_value()
-            
-            #if moist_value < MOIST.MIN_TARGET or moist_value > MOIST.MAX_TARGET:
-            #    array = notes_sharp
-            #else:
-            #    array = notes_nat
-            
+        
+        # Determine array
         array = self.get_array()
         length = len(array)
         quartpoint = int(length/4)
         midpoint = int(length/2)
         tquartpoint = int(3*length/4)
                 
+        # Determine what section of the note array to get a random note from
         touch_value_2 = self.touch.get_value()
         if touch_value_1 - touch_value_2 != 0:
             if touch_value_2 < -50:
@@ -191,26 +172,32 @@ class PlantMusic():
                 note = np.random.choice(array[midpoint:tquartpoint],size=1)
             elif touch_value_2 < 128:
                 note = np.random.choice(array[tquartpoint:-1],size=1)
-            #if touch_value_2 > 0:
-            #    note = np.random.choice(array[midpoint:-1],size=1)
-            #elif touch_value_2 < 0:
-            #    note = np.random.choice(array[0:midpoint],size=1)
             else:
                 pass
         else:
             pass
             
+        # Play the note!
         self.buzzer.play(note,tempo,False)
         time.sleep(0.01)
-            
-            #self.buzzer.play(note,tempo,True)
-            #time.sleep(0.01)
+        
+    # End def
+    
             
     def stop_button(self):
+        """ Returns True if pressed, False if unpressed """
         return self.button.is_pressed()
+        
+    # End def
+    
     
     def cleanup(self):
+        """ Cleanup """
         self.buzzer.cleanup()
+        
+    # End def
+
+# End class
         
             
 # ------------------------------------------------------------------------
@@ -224,11 +211,17 @@ if __name__ == '__main__':
     # Create instantiation of the lock
     plant_music = PlantMusic()
     
+    print("Press Button to Start")
+    
     try:
         while True:
+            # Start Button
             if plant_music.stop_button() == True:
+                print("Press Button to Stop")
+                
                 while True:
                     plant_music.play()
+                    # Stop Button
                     if plant_music.stop_button() == True:
                         raise KeyboardInterrupt
                     else:
@@ -238,4 +231,5 @@ if __name__ == '__main__':
             
     except KeyboardInterrupt:
         plant_music.cleanup()
+        
     print("Program Complete")
