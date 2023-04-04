@@ -20,6 +20,7 @@ In order to make the program automatically boot, do the following steps:
   2. Add in the line "@reboot sleep 30 && bash (run directory path) > (cronlog path) 2>&1" with the appropriate paths
   3. Reboot and test
   
+### Basic Explanation of Drivers
 The light sensor driver can return lux readings, which determine the duration that the note will play for (or, the tempo). This tempo is calculated from a piecewise system of linear equations in the plant music driver.
   
 The moisture sensor driver can return raw readings, which determine what note array the note will come from. If the moisture reading is within a target range, the returned array will be roughly two octaves of natural notes. If the reading is outside the target range, the returned array will contain accidentals as well, to indicate an unhappy condition :(
