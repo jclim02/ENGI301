@@ -14,6 +14,11 @@ For software, download files from the [software folder](https://github.com/jclim
   - sudo pip3 install adafruit-blinka
   - sudo pip3 install adafruit-circuitpython-bh1750
   - sudo pip3 install adafruit-circuitpython-cap1188
+
+In order to make the program automatically boot, do the following steps:
+  1. sudo crontab -e
+  2. Add in the line "@reboot sleep 30 && bash <run directory path> > <cronlog path> 2>&1" with the appropriate paths
+  3. Reboot and test
   
 The light sensor driver can return lux readings, which determine the duration that the note will play for (or, the tempo). This tempo is calculated from a piecewise system of linear equations in the plant music driver.
   
