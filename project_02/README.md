@@ -2,5 +2,5 @@
  
 Create a PCB for an etch-a-sketch.
 
-## docs
+## /docs
 Includes: BOM (.csv), schematics PDF, CAM-generated files, pictures of top and bottom layout (.pdf)
